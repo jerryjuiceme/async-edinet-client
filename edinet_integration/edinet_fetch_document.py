@@ -100,11 +100,6 @@ class EdinetDocAPIFetcher(EdinetBaseAPIFetcher):
                                     "Could not delete temp file %s: %s", tmp_path, e
                                 )
 
-            except EdinetClientError as e:
-                logger.error("Error fetching document %s: %s", doc_id, e)
-                message.extract_message = str(e)
-                return message
-
             except EdinetAPIError as e:
                 logger.error("Error fetching document %s: %s", doc_id, e)
                 message.extract_message = str(e)
