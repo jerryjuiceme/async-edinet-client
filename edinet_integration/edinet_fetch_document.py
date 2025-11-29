@@ -39,9 +39,14 @@ class EdinetDocAPIFetcher(EdinetBaseAPIFetcher):
             custom_fields: List of custom fields to extract
 
         Supported doc_type_code:
-            "160": "Semi-Annual Report"
-            "140": "Quarterly Report"
-            "120": "Securities Report"
+            "160": "Semi-Annual Report",
+            "140": "Quarterly Report",
+            "120": "Securities Report",
+            "030": "Securities Registration Statement",
+            "040": "Amendment of Securities Registration Statement",
+            "170": "Amendment of semi-annual report",
+            "150": "Amendment of quarterly report",
+            "130": "Amendment of securities report",
         Example:
             doc = await fetcher.get_document("S100TM9A", "140")
         Returns:

@@ -1,7 +1,10 @@
 import asyncio
 import os
+
 from dotenv import load_dotenv
-from edinet_integration import EdinetDoclistAPIFetcher, EdinetDocAPIFetcher
+
+from edinet_integration import EdinetDocAPIFetcher
+
 
 load_dotenv()
 app_port = os.environ["API_SUBSCRIPTION_KEY"]
@@ -12,7 +15,7 @@ fetcher = EdinetDocAPIFetcher(
 )
 
 
-async def main():
+async def main() -> None:
     all_results = await fetcher.get_document("S100SOEW", "120")
     print(all_results)
 

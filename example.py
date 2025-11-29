@@ -49,15 +49,15 @@ def _save_file(file_path: Path, content: str) -> None:
 
 # doc_fetcher = EdinetDocAPIFetcher(
 #         subscription_key=app_port,
-#         fetch_interval=0.1,
+#         fetch_interval=1,
 #         description_translation=True,
 #     )
 
 
-async def main_doc(doc: str = "S100U1HP") -> None:
+async def main_doc(doc: str = "S100WRZY") -> None:
     fetcher = EdinetDocAPIFetcher(
         subscription_key=app_port,
-        fetch_interval=0.1,
+        fetch_interval=1,
         description_translation=True,
     )
     DOC_TYPE = "140"
@@ -77,9 +77,9 @@ async def main_doc(doc: str = "S100U1HP") -> None:
 async def multi_doc_list():
     fetcher = EdinetDoclistAPIFetcher(
         subscription_key=app_port,
-        fetch_interval=0.1,
+        fetch_interval=1,
     )
-    all_results = await fetcher.fetch_date_interval_doc_list("2024-02-11", "2024-02-18")
+    all_results = await fetcher.fetch_date_interval_doc_list("2025-09-28", "2025-10-02")
     file_path = cur_dir / f"docs_multi{datetime.now().strftime('%Y-%m-%d_%H:%M')}.json"
     _save_file(file_path, all_results.model_dump_json(indent=4, by_alias=True))
 
@@ -87,7 +87,7 @@ async def multi_doc_list():
 async def single_doc_list():
     fetcher = EdinetDoclistAPIFetcher(
         subscription_key=app_port,
-        fetch_interval=0.1,
+        fetch_interval=1,
     )
     single_result = await fetcher.fetch_single_doc_list("2024-07-12")
     file_path = cur_dir / f"docs_single{datetime.now().strftime('%Y-%m-%d_%H:%M')}.json"
@@ -97,7 +97,7 @@ async def single_doc_list():
 async def wrong_date_doc_list():
     fetcher = EdinetDoclistAPIFetcher(
         subscription_key=app_port,
-        fetch_interval=0.1,
+        fetch_interval=1,
     )
     single_result = await fetcher.fetch_single_doc_list("2028-07-12")
     file_path = cur_dir / f"docs_single{datetime.now().strftime('%Y-%m-%d_%H:%M')}.json"
@@ -106,15 +106,15 @@ async def wrong_date_doc_list():
 
 async def main():
     configure_logging(app_level=log_level, httpx_level=logging.WARNING)
-    # task = [asyncio.create_task(main_doc(doc)) for doc in DOCS.values()]
-    # task = [asyncio.create_task(main_doc(doc)) for doc in ANNUAL_DOCS]
-    # task.append(asyncio.create_task(multi_doc_list()))
-    # task.append(asyncio.create_task(single_doc_list()))
+    # tasks = [asyncio.create_task(main_doc(doc)) for doc in DOCS.values()]
+    # tasks = [asyncio.create_task(main_doc(doc)) for doc in ANNUAL_DOCS]
+    # tasks.append(asyncio.create_task(multi_doc_list()))
+    # tasks.append(asyncio.create_task(single_doc_list()))
     # await wrong_date_doc_list()
     # await single_doc_list()
     # await multi_doc_list()
     await main_doc()
-    # await asyncio.gather(*task)
+    # await asyncio.gather(*tasks)
 
 
 if __name__ == "__main__":
