@@ -26,9 +26,10 @@ class EdinetDocAPIFetcher(EdinetBaseAPIFetcher):
     async def get_document(
         self,
         doc_id: str,
-        doc_type_code: Literal["160", "140", "120", "undefined"] = "undefined",
+        doc_type_code: str = "undefined",  # TODO: remove
         translator: BaseTranslator | None = None,
         custom_fields: list[str] | None = None,
+        raise_on_error: bool = False,
     ) -> ExtractDocMessage:
         """Fetches and processes a document from the EDINET API.
 
@@ -38,15 +39,6 @@ class EdinetDocAPIFetcher(EdinetBaseAPIFetcher):
             translator: Translator to use for description translation
             custom_fields: List of custom fields to extract
 
-        Supported doc_type_code:
-            "160": "Semi-Annual Report",
-            "140": "Quarterly Report",
-            "120": "Securities Report",
-            "030": "Securities Registration Statement",
-            "040": "Amendment of Securities Registration Statement",
-            "170": "Amendment of semi-annual report",
-            "150": "Amendment of quarterly report",
-            "130": "Amendment of securities report",
         Example:
             doc = await fetcher.get_document("S100TM9A", "140")
         Returns:
@@ -108,6 +100,8 @@ class EdinetDocAPIFetcher(EdinetBaseAPIFetcher):
             except EdinetAPIError as e:
                 logger.error("Error fetching document %s: %s", doc_id, e)
                 message.extract_message = str(e)
+                if raise_on_error:
+                    raise
                 return message
 
             except Exception as e:
@@ -116,6 +110,8 @@ class EdinetDocAPIFetcher(EdinetBaseAPIFetcher):
                     doc_id,
                 )
                 message.extract_message = f"Critical error: {e!s}"
+                if raise_on_error:
+                    raise EdinetAPIError(message.extract_message)
                 return message
 
         return message

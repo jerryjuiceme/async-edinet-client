@@ -32,7 +32,7 @@ class EdinetBaseAPIFetcher:
             "170": "Amendment of semi-annual report",
             "150": "Amendment of quarterly report",
             "130": "Amendment of securities report",
-            # "180": "Extraordinary Report",
+            "180": "Extraordinary Report",
             # "350": "Large Holding Report",
             # "030": "Securities Registration Statement",
         }
@@ -68,6 +68,16 @@ class EdinetBaseAPIFetcher:
             retry_timeout: Total timeout for retry attempts in seconds
             request_timeout: Individual request timeout in seconds
             description_translation: Enable description translation
+
+        Default supported codes - doc_type_code:
+            "160": "Semi-Annual Report"
+            "140": "Quarterly Report"
+            "120": "Securities Report"
+            "030": "Securities Registration Statement"
+            "040": "Amendment of Securities Registration Statement"
+            "170": "Amendment of semi-annual report"
+            "150": "Amendment of quarterly report"
+            "130": "Amendment of securities report"
         """
         self.subscription_key = subscription_key
         self.fetch_interval = fetch_interval

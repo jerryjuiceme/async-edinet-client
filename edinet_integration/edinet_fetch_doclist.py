@@ -34,7 +34,8 @@ class EdinetDoclistAPIFetcher(EdinetBaseAPIFetcher):
         self,
         date: str | date_type,
         translator: BaseTranslator | None = None,
-        docs_list_type: Literal[1, 2] = 2,
+        doc_types: list[str] | None = None,
+        # docs_list_type: Literal[1, 2] = 2,
     ) -> DocListSingleMessage:
         """
         Fetch document list for a single date.
@@ -42,12 +43,16 @@ class EdinetDoclistAPIFetcher(EdinetBaseAPIFetcher):
         Args:
             date: Date in YYYY-MM-DD format
             translator: Translator controller
-            docs_list_type: Document type code (1-5)
+            doc_types: List of document types like ['180', '130','120']
 
         :param translator:
             You can use GoogleTranslator or BypassTranslator
             to enable translation or disable for particular func run,
             even when the global translator is already configured.
+
+        :param doc_types:
+            List of document types like ['180', '130','120']
+            you want to filter by. If None, default supported types will be used.
 
         Returns:
             DocListSingleMessage
@@ -56,7 +61,7 @@ class EdinetDoclistAPIFetcher(EdinetBaseAPIFetcher):
         date_str = self._validate_date(date)
         logger.info("Fetching documents for date: %s", date_str)
         date_obj = datetime.strptime(date_str, "%Y-%m-%d")
-
+        docs_list_type: Literal[1, 2] = 2
         async with self._get_client() as client:
             try:
                 raw_data, status = await self._fetch_list(
@@ -69,6 +74,7 @@ class EdinetDoclistAPIFetcher(EdinetBaseAPIFetcher):
                 docs: list[DoclistResult] = await self._filter_docs(
                     raw_data.get("results"),
                     translator,
+                    doc_types,
                 )
                 docklist: DocListSingleMessage = DocListSingleMessage(
                     status_code=int(status),
@@ -103,7 +109,8 @@ class EdinetDoclistAPIFetcher(EdinetBaseAPIFetcher):
         date_from: str,
         date_to: str,
         translator: BaseTranslator | None = None,
-        docs_list_type: Literal[1, 2] = 2,
+        doc_types: list[str] | None = None,
+        # docs_list_type: Literal[1, 2] = 2,
     ) -> DocListMultiMessage:
         """
         Fetch document list for a date interval.
@@ -112,11 +119,16 @@ class EdinetDoclistAPIFetcher(EdinetBaseAPIFetcher):
             date_from: Start date in YYYY-MM-DD format
             date_to: End date in YYYY-MM-DD format
             translator: Translator controller
+            doc_types: List of document types like ['180', '130','120']
 
         :param translator:
             You can use GoogleTranslator or BypassTranslator
             to enable translation or disable for particular func run,
             even when the global translator is already configured.
+
+        :param doc_types:
+            List of document types like ['180', '130','120']
+            you want to filter by. If None, default supported types will be used.
         Returns:
             DocListMultiMessage
             Pydantic model with metadata and filtered document results
@@ -124,6 +136,7 @@ class EdinetDoclistAPIFetcher(EdinetBaseAPIFetcher):
 
         """
         logger.info("Fetching document lists from %s to %s" % (date_from, date_to))
+        docs_list_type: Literal[1, 2] = 2
         date_cursor = datetime.strptime(self._validate_date(date_from), "%Y-%m-%d")
         date_end = datetime.strptime(self._validate_date(date_to), "%Y-%m-%d")
         res = dict(status_code=[], fetch_status=[], message=[], results=[])
@@ -145,7 +158,9 @@ class EdinetDoclistAPIFetcher(EdinetBaseAPIFetcher):
                     if translator is None:
                         translator = self.translator
 
-                    docs = await self._filter_docs(raw_data.get("results"), translator)
+                    docs = await self._filter_docs(
+                        raw_data.get("results"), translator, doc_types
+                    )
                     if docs:
                         [res["results"].append(doc) for doc in docs]
                 except Exception as e:
@@ -252,6 +267,7 @@ class EdinetDoclistAPIFetcher(EdinetBaseAPIFetcher):
         self,
         docs: list[dict] | None,
         translator: BaseTranslator,
+        doc_types: list[str] | None,
     ) -> list[DoclistResult]:
         """
         Internal method to fetch document list with retry logic.
@@ -272,7 +288,7 @@ class EdinetDoclistAPIFetcher(EdinetBaseAPIFetcher):
             logger.info("No docs to filter")
             return filtered
         for doc in docs:
-            if self._is_valid(doc):
+            if self._is_valid(doc, doc_types):
                 try:
                     doc["filerName"] = doc["filerName"].encode().decode("utf-8")
                     new_doc: DoclistResult = DoclistResult(**doc)
@@ -293,11 +309,13 @@ class EdinetDoclistAPIFetcher(EdinetBaseAPIFetcher):
         """
         doc.filer_name_eng = await translator.translate(doc.filer_name)
 
-    def _is_valid(self, doc: dict[str, Any]) -> bool:
-        return (
-            doc.get("filerName") is not None
-            and doc.get("docTypeCode") in self.SUPPORTED_DOC_TYPES
-        )
+    def _is_valid(
+        self,
+        doc: dict[str, Any],
+        doc_types: list[str] | None,
+    ) -> bool:
+        sdoc_types = self.SUPPORTED_DOC_TYPES if doc_types is None else doc_types
+        return doc.get("filerName") is not None and doc.get("docTypeCode") in sdoc_types
 
     def _validate_date(self, date: str | date_type) -> str:
         """Validate date format (YYYY-MM-DD)."""
