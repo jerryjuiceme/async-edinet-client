@@ -1,12 +1,11 @@
 import logging
 from pathlib import Path
 import tempfile
-from typing import Literal
 
 import httpx
 import stamina
 
-from .dependencies import BaseTranslator
+from .dependencies import get_translator
 from .edinet_fetch import EdinetBaseAPIFetcher
 from .exceptions import (
     EdinetAPIAuthError,
@@ -26,8 +25,7 @@ class EdinetDocAPIFetcher(EdinetBaseAPIFetcher):
     async def get_document(
         self,
         doc_id: str,
-        doc_type_code: str = "undefined",  # TODO: remove
-        translator: BaseTranslator | None = None,
+        bypass_translation: bool = False,
         custom_fields: list[str] | None = None,
         raise_on_error: bool = False,
     ) -> ExtractDocMessage:
@@ -35,10 +33,19 @@ class EdinetDocAPIFetcher(EdinetBaseAPIFetcher):
 
         Args:
             doc_id: Document ID
-            doc_type_code: Document type code
             translator: Translator to use for description translation
-            custom_fields: List of custom fields to extract
+            bypass_translation: True to disable and bypass translation
+            custom_fields: List of custom "elementId" fields to extract
+            raise_on_error: Whether to raise an exception on error
 
+        :param bypass_translation:
+            You can use bypass_translation to disable and bypass translation
+            for particular func run, only when the global translator is configured.
+
+        : param custom_fields:
+            List of custom "elementId" fields to extract according to the EDINET documentation.
+            You can specify a list of custom fields to leave in results,
+            like ["jppfs_cor:Liabilities", "jppfs_cor:Assets", "jppfs_cor:NetAssets"]
         Example:
             doc = await fetcher.get_document("S100TM9A", "140")
         Returns:
@@ -47,7 +54,6 @@ class EdinetDocAPIFetcher(EdinetBaseAPIFetcher):
         doc_type = "5"
         message = ExtractDocMessage(
             doc_id=doc_id,
-            doc_type_code=doc_type_code,
             total_csv_files=0,
             extract_status="fail",
             extract_message=None,
@@ -74,12 +80,15 @@ class EdinetDocAPIFetcher(EdinetBaseAPIFetcher):
                     try:
                         tmp_file.write(content)
                         tmp_file.flush()
-                        real_translator = translator or self.translator
+                        real_translator = (
+                            get_translator(not bypass_translation)
+                            if bypass_translation
+                            else self.translator
+                        )
 
                         result = await process_zip_file(
                             tmp_path,
                             doc_id,
-                            doc_type_code,
                             real_translator,
                             custom_fields,
                         )
@@ -97,7 +106,13 @@ class EdinetDocAPIFetcher(EdinetBaseAPIFetcher):
                                     "Could not delete temp file %s: %s", tmp_path, e
                                 )
 
-            except EdinetAPIError as e:
+            except (
+                EdinetClientError,
+                EdinetAPIAuthError,
+                EdinetAPIRateLimitError,
+                EdinetServerError,
+                EdinetAPIError,
+            ) as e:
                 logger.error("Error fetching document %s: %s", doc_id, e)
                 message.extract_message = str(e)
                 if raise_on_error:

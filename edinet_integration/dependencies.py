@@ -21,7 +21,7 @@ class GoogleTranslator(BaseTranslator):
         try:
             async with self._get_translator() as translator:
                 result = await translator.translate(input_text, dest="en")
-                logger.debug("Description translated successfully")
+                logger.debug("Abstract translated successfully")
                 return result.text
         except Exception:
             logger.warning("Description translation failed, returning the same text")
@@ -35,7 +35,7 @@ class GoogleTranslator(BaseTranslator):
 
 class BypassTranslator(BaseTranslator):
     async def translate(self, input_text: str) -> str:
-        return input_text
+        return "translation disabled: " + input_text
 
 
 def get_translator(condition: bool) -> BaseTranslator:

@@ -6,7 +6,7 @@ from typing import Any, Literal
 import httpx
 import stamina
 
-from .dependencies import BaseTranslator
+from .dependencies import BaseTranslator, get_translator
 from .edinet_fetch import EdinetBaseAPIFetcher
 from .exceptions import (
     EdinetAPIAuthError,
@@ -33,7 +33,7 @@ class EdinetDoclistAPIFetcher(EdinetBaseAPIFetcher):
     async def fetch_single_doc_list(
         self,
         date: str | date_type,
-        translator: BaseTranslator | None = None,
+        bypass_translation: bool = False,
         doc_types: list[str] | None = None,
         # docs_list_type: Literal[1, 2] = 2,
     ) -> DocListSingleMessage:
@@ -42,13 +42,12 @@ class EdinetDoclistAPIFetcher(EdinetBaseAPIFetcher):
 
         Args:
             date: Date in YYYY-MM-DD format
-            translator: Translator controller
+            bypass_translation: True to disable and bypass translation
             doc_types: List of document types like ['180', '130','120']
 
-        :param translator:
-            You can use GoogleTranslator or BypassTranslator
-            to enable translation or disable for particular func run,
-            even when the global translator is already configured.
+        :param bypass_translation:
+            You can use bypass_translation to disable and bypass translation
+            for particular func run, only when the global translator is configured.
 
         :param doc_types:
             List of document types like ['180', '130','120']
@@ -69,8 +68,11 @@ class EdinetDoclistAPIFetcher(EdinetBaseAPIFetcher):
                 )
                 logger.debug("Status: %s", status)
 
-                if translator is None:
-                    translator = self.translator
+                translator = (
+                    get_translator(not bypass_translation)
+                    if bypass_translation
+                    else self.translator
+                )
                 docs: list[DoclistResult] = await self._filter_docs(
                     raw_data.get("results"),
                     translator,
@@ -108,7 +110,7 @@ class EdinetDoclistAPIFetcher(EdinetBaseAPIFetcher):
         self,
         date_from: str,
         date_to: str,
-        translator: BaseTranslator | None = None,
+        bypass_translation: bool = False,
         doc_types: list[str] | None = None,
         # docs_list_type: Literal[1, 2] = 2,
     ) -> DocListMultiMessage:
@@ -118,7 +120,7 @@ class EdinetDoclistAPIFetcher(EdinetBaseAPIFetcher):
         Args:
             date_from: Start date in YYYY-MM-DD format
             date_to: End date in YYYY-MM-DD format
-            translator: Translator controller
+            bypass_translation: True to disable and bypass translation
             doc_types: List of document types like ['180', '130','120']
 
         :param translator:
@@ -155,8 +157,12 @@ class EdinetDoclistAPIFetcher(EdinetBaseAPIFetcher):
                     res["message"].append(
                         {date_str: raw_data["metadata"].get("message")}
                     )
-                    if translator is None:
-                        translator = self.translator
+
+                    translator = (
+                        get_translator(not bypass_translation)
+                        if bypass_translation
+                        else self.translator
+                    )
 
                     docs = await self._filter_docs(
                         raw_data.get("results"), translator, doc_types
@@ -232,12 +238,17 @@ class EdinetDoclistAPIFetcher(EdinetBaseAPIFetcher):
         ):
             with attempt:
                 try:
+                    logger.debug("Fetching doc list for %s", date)
                     response = await client.get(
                         self.URL_DOC_LIST,
                         params=params,
                     )
                     st_code: int = response.status_code
                     if st_code == self.ResponseStatus.SUCCESS.value:
+                        logger.debug(
+                            "Successfully fetched doc list for %s, Status code %s"
+                            % (date, st_code),
+                        )
                         return response.json(), st_code
                     elif st_code == self.ResponseStatus.AUTH_ERROR.value:
                         raise EdinetAPIAuthError(

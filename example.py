@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 from edinet_integration import (
     EdinetDocAPIFetcher,
     EdinetDoclistAPIFetcher,
+    EdinetAPIFetcher,
     configure_logging,
 )
 
@@ -55,16 +56,18 @@ def _save_file(file_path: Path, content: str) -> None:
 
 
 async def main_doc(doc: str = "S100WRZY") -> None:
-    fetcher = EdinetDocAPIFetcher(
-        subscription_key=app_port,
-        fetch_interval=1,
-        description_translation=True,
-    )
-    DOC_TYPE = "140"
+    # fetcher = EdinetDocAPIFetcher(
+    #     subscription_key=app_port,
+    #     fetch_interval=1,
+    #     description_translation=True,
+    # )
+
+    fetcher = EdinetAPIFetcher(subscription_key=app_port)
+    # DOC_TYPE = "140"
     results = await fetcher.get_document(
         doc_id=doc,
-        doc_type_code=DOC_TYPE,
-        custom_fields=CUSTOM_FIELDS,
+        # custom_fields=CUSTOM_FIELDS,
+        # bypass_translation=True,
     )
 
     file_path = (
@@ -79,17 +82,19 @@ async def multi_doc_list():
         subscription_key=app_port,
         fetch_interval=1,
     )
-    all_results = await fetcher.fetch_date_interval_doc_list("2025-09-28", "2025-10-02")
+    all_results = await fetcher.fetch_date_interval_doc_list("2025-09-20", "2025-10-02")
     file_path = cur_dir / f"docs_multi{datetime.now().strftime('%Y-%m-%d_%H:%M')}.json"
     _save_file(file_path, all_results.model_dump_json(indent=4, by_alias=True))
 
 
 async def single_doc_list():
     fetcher = EdinetDoclistAPIFetcher(
-        subscription_key=app_port,
-        fetch_interval=1,
+        subscription_key=app_port, fetch_interval=1, description_translation=True
     )
-    single_result = await fetcher.fetch_single_doc_list("2024-07-12")
+    # fetcher = EdinetAPIFetcher(subscription_key=app_port)
+    single_result = await fetcher.fetch_single_doc_list(
+        "2024-07-12", bypass_translation=True
+    )
     file_path = cur_dir / f"docs_single{datetime.now().strftime('%Y-%m-%d_%H:%M')}.json"
     _save_file(file_path, single_result.model_dump_json(indent=4, by_alias=True))
 
@@ -105,6 +110,7 @@ async def wrong_date_doc_list():
 
 
 async def main():
+    # configure_logging(app_level="DEBUG", httpx_level=logging.WARNING)
     configure_logging(app_level=log_level, httpx_level=logging.WARNING)
     # tasks = [asyncio.create_task(main_doc(doc)) for doc in DOCS.values()]
     # tasks = [asyncio.create_task(main_doc(doc)) for doc in ANNUAL_DOCS]

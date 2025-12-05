@@ -19,7 +19,7 @@ class DoclistResult(ResultsBaseModel):
     form_code: str | None = Field(alias="formCode")
     seq_number: int | None = Field(alias="seqNumber")
     fund_code: str | None = Field(alias="fundCode")
-    dov_description: str | None = Field(alias="docDescription")
+    doc_description: str = Field(alias="docDescription")
     jcn: str | None = Field(alias="JCN")
     xbrl_flag: bool | None = Field(alias="xbrlFlag")
     pdf_flag: bool | None = Field(alias="pdfFlag")

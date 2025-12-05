@@ -42,7 +42,6 @@ COMMON_ENCODINGS: list[str] = [
 async def process_zip_file(
     path_to_zip_file: Path,
     doc_id: str,
-    doc_type_code: str,  # Passed to process_raw_csv_data
     translator: BaseTranslator,
     custom_fields: list[str] | None,
 ) -> ExtractDocMessage[DocResult]:
@@ -55,7 +54,6 @@ async def process_zip_file(
     # loop = asyncio.get_running_loop()
     extracted_result: ExtractDocMessage[DocResult] = ExtractDocMessage(
         doc_id=doc_id,
-        doc_type_code=doc_type_code,
         total_csv_files=0,
         extract_status="fail",
         extract_message=None,

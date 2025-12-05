@@ -9,6 +9,7 @@ V = TypeVar("V")
 
 
 class DocResult(ResultsBaseModel):
+
     element_id: str = Field(validation_alias="要素ID")
     item_name: str | None = Field(validation_alias="項目名")
     context_identifier: str = Field(validation_alias="コンテキストID")
@@ -36,13 +37,15 @@ class DocResult(ResultsBaseModel):
 
 class ExMixIn(BaseModel):
     doc_id: str
-    doc_type_code: str
     total_csv_files: int
     extract_status: Literal["success", "fail"]
     extract_message: str | None
 
 
-class ExtractDocMessage(MessageBaseModel, ExMixIn): ...
+class ExtractDocMessage(MessageBaseModel, ExMixIn):
+    """Result for a single document from the EDINET API."""
+
+    ...
 
 
 V = TypeVar("V")
