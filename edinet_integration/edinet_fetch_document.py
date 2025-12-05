@@ -46,6 +46,9 @@ class EdinetDocAPIFetcher(EdinetBaseAPIFetcher):
             List of custom "elementId" fields to extract according to the EDINET documentation.
             You can specify a list of custom fields to leave in results,
             like ["jppfs_cor:Liabilities", "jppfs_cor:Assets", "jppfs_cor:NetAssets"]
+
+        :param raise_on_error:
+            If True, will raise an exception on error.
         Example:
             doc = await fetcher.get_document("S100TM9A")
         Returns:

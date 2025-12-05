@@ -51,7 +51,7 @@ class EdinetDoclistAPIFetcher(EdinetBaseAPIFetcher):
 
         :param doc_types:
             List of document types like ['180', '130','120']
-            you want to filter by. If None, default supported types will be used.
+            you want to filter by. If None or empty, default supported types will be used.
 
         Returns:
             DocListSingleMessage
