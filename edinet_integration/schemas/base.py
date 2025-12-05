@@ -37,3 +37,10 @@ class MessageBaseModel(BaseModel, Generic[T]):
     @field_serializer("process_date", when_used="json")
     def serialize_process_datetime(self, dt: datetime) -> str:
         return dt.strftime("%Y-%m-%d %H:%M:%S")
+
+    def flat(self) -> list[dict]:
+        meta = self.model_dump()
+        structured_data = meta.pop("results")
+        if structured_data:
+            return [{**meta, **r} for r in structured_data]
+        return [meta]
