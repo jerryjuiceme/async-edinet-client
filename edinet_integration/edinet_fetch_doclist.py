@@ -30,7 +30,7 @@ class EdinetDoclistAPIFetcher(EdinetBaseAPIFetcher):
     #### Get List of Publisehed Reports ####
     ########################################
 
-    async def fetch_single_doc_list(
+    async def get_filings_daily(
         self,
         date: str | date_type,
         bypass_translation: bool = False,
@@ -106,7 +106,7 @@ class EdinetDoclistAPIFetcher(EdinetBaseAPIFetcher):
                     results=[],
                 )
 
-    async def fetch_date_interval_doc_list(
+    async def get_filings_period(
         self,
         date_from: str,
         date_to: str,

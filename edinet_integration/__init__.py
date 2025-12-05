@@ -16,7 +16,7 @@ from .utils import (
 
 
 __version__ = "0.1.0"
-__author__ = "Jerryjuice"
+__author__ = "jerryjuiceme"
 __description__ = "Edinet API Fetcher for Python."
 
 

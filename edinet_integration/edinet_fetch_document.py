@@ -47,7 +47,7 @@ class EdinetDocAPIFetcher(EdinetBaseAPIFetcher):
             You can specify a list of custom fields to leave in results,
             like ["jppfs_cor:Liabilities", "jppfs_cor:Assets", "jppfs_cor:NetAssets"]
         Example:
-            doc = await fetcher.get_document("S100TM9A", "140")
+            doc = await fetcher.get_document("S100TM9A")
         Returns:
             ExtractDocMessages
         """
