@@ -91,7 +91,7 @@ class EdinetDoclistAPIFetcher(EdinetBaseAPIFetcher):
                 logger.info("Fetched %s documents for date: %s", len(docs), date)
                 return docklist
             except Exception as e:
-                logger.exception(
+                logger.error(
                     "Failed to fetch or process document list for %s",
                     date,
                 )
@@ -270,7 +270,7 @@ class EdinetDoclistAPIFetcher(EdinetBaseAPIFetcher):
                         f"Connection error: {e}",
                     )
                 except Exception:
-                    logger.exception("Unexpected error fetching doc list for %s", date)
+                    logger.error("Unexpected error fetching doc list for %s", date)
                     raise EdinetAPIError("Unknown error after retries")
         raise EdinetAPIError("Unknown error after retries")
 

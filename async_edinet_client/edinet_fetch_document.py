@@ -123,7 +123,7 @@ class EdinetDocAPIFetcher(EdinetBaseAPIFetcher):
                 return message
 
             except Exception as e:
-                logger.exception(
+                logger.error(
                     "Failed to fetch or process individual document for %s",
                     doc_id,
                 )
