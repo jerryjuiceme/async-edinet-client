@@ -7,7 +7,9 @@ __pycache__/
 *.so
 
 # temp
-*.csv
+# *.csv
+# *.json
+
 
 .vscode
 # Distribution / packaging
@@ -36,7 +38,7 @@ MANIFEST
 *.manifest
 *.spec
 
-*.json
+
 
 # Installer logs
 pip-log.txt
