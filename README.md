@@ -1,10 +1,10 @@
 # async-edinet-client
 
-[![Python 3.12–3.13](https://img.shields.io/badge/Python-3.12--3.13-000000?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)  
+[![Python 3.12–3.13](https://img.shields.io/badge/Python-3.12--3.13-000000?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
 [![Last Commit](https://img.shields.io/github/last-commit/jerryjuiceme/async-edinet-client?style=for-the-badge&color=000000)](https://github.com/jerryjuiceme/async-edinet-client/commits)
 
 ![Pydantic](https://img.shields.io/badge/Pydantic-000000?style=for-the-badge&logo=pydantic&logoColor=white)
-![HTTPX](https://img.shields.io/badge/HTTPX-000000?style=for-the-badge&logo=fastapi&logoColor=white)  
+![HTTPX](https://img.shields.io/badge/HTTPX-000000?style=for-the-badge&logo=fastapi&logoColor=white)
 ![Translate](https://img.shields.io/badge/Google%20Translate-000000?style=for-the-badge&logo=google)
 
 ## Description
