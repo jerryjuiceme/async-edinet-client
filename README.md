@@ -4,7 +4,7 @@
 [![Last Commit](https://img.shields.io/github/last-commit/jerryjuiceme/async-edinet-client?style=for-the-badge&color=000000)](https://github.com/jerryjuiceme/async-edinet-client/commits)  
 ![Pydantic](https://img.shields.io/badge/Pydantic-000000?style=for-the-badge&logo=pydantic&logoColor=white)  
 ![HTTPX](https://img.shields.io/badge/HTTPX-000000?style=for-the-badge&logo=fastapi&logoColor=white)  
-![Google Translate](https://img.shields.io/badge/Google%20Translate-000000?style=for-the-badge&logo=google)
+![Translate](https://img.shields.io/badge/Google%20Translate-000000?style=for-the-badge&logo=google)
 
 ## Description
 
