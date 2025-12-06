@@ -13,6 +13,14 @@
 
 This library enables the retrieval of specific financial and non-financial reports, as well as lists of filed reports for specific dates or periods. It utilizes **Pydantic** for data validation and transfer, and **HTTPX** for asynchronous API requests. Additionally, it features an asynchronous integration with **Google Translate** to automatically translate report descriptions and company/fund names from Japanese to English.
 
+## Tech Stack
+
+- **Language:** Python 3.12+
+- **Validation:** Pydantic
+- **HTTP Client:** HTTPX
+- **Translation:** Google Translate
+- **Package Manager:** uv
+
 ## Quickstart
 
 To get started, initialize the fetcher with your API key. You can obtain a free API subscription key [here](https://disclosure2.edinet-fsa.go.jp/).
