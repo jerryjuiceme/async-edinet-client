@@ -9,7 +9,7 @@ __pycache__/
 # temp
 # *.csv
 # *.json
-
+.DS_Store
 
 .vscode
 # Distribution / packaging
