@@ -3,11 +3,11 @@ import os
 
 from dotenv import load_dotenv
 
-from edinet_integration import EdinetDocAPIFetcher
+from async_edinet_client import EdinetDocAPIFetcher
 
 
 load_dotenv()
-app_port = os.environ["API_SUBSCRIPTION_KEY"]
+app_port = os.environ["API_EDINET_API_KEY"]
 log_level = os.environ["LOG_LEVEL"]
 
 fetcher = EdinetDocAPIFetcher(
