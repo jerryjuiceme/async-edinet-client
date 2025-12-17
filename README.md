@@ -150,6 +150,8 @@ df = pd.DataFrame(flat_result)
 df.to_csv("test.csv", index=False)
 ```
 
+###
+
 ### Example Outputs
 
 You can view examples of the output structures in the `example_outputs` directory:
@@ -237,4 +239,52 @@ async_edinet_client.configure_logging(app_level="DEBUG", httpx_level="INFO")
 
 # Configure only HTTPX logging (default WARNING)
 async_edinet_client.configure_logging_httpx()
+```
+
+---
+
+## HTTP Client Injection 
+
+By default, the library manages the lifecycle of the HTTP client internally. Each API call will transparently create and close an `httpx.AsyncClient` with proper timeouts and connection limits.
+
+However, **all public API methods support injecting an external `httpx.AsyncClient`**. This allows advanced users to **reuse an existing client**, enabling connection pooling, keep-alive, and seamless integration with application-level dependency injection (DI).
+
+### Advanced Usage — Client Reuse
+
+You can create an `httpx.AsyncClient` once and reuse it across multiple API calls.
+
+```py
+import httpx
+from async_edinet_client import EdinetDocAPIFetcher
+
+async with httpx.AsyncClient() as client:
+    fetcher = EdinetDocAPIFetcher(subscription_key="YOUR_API_KEY")
+
+    document = await fetcher.get_document(
+        doc_id="S100TM9A",
+        client=client,
+    )
+```
+
+In this mode, the client is **borrowed** by the library and will **not** be closed after the request.
+
+### FastAPI Integration (DI + Lifespan)
+
+For web applications, the recommended approach is to create a shared HTTP client during application startup and inject it into handlers.
+
+```py
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    app.state.http_client = httpx.AsyncClient()
+    yield
+    await app.state.http_client.aclose()
+
+```
+
+```py
+doc = await fetcher.get_document(
+    "S100TM9A",
+    client=request.app.state.http_client,
+)
+
 ```
