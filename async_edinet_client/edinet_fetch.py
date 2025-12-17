@@ -92,10 +92,21 @@ class EdinetBaseAPIFetcher:
     #########################
 
     @asynccontextmanager
-    async def _get_client(self) -> AsyncGenerator[httpx.AsyncClient, None]:
+    async def _get_client(
+        self,
+        client: httpx.AsyncClient | None = None,
+    ) -> AsyncGenerator[httpx.AsyncClient, None]:
         """Context manager for HTTP client with proper configuration."""
+        """
+        If client is provided — reuse it (do not close).
+        If not — create and close own.
+        """
+        if client is not None:
+            yield client
+            return
+
         timeout = httpx.Timeout(self.request_timeout)
         limits = httpx.Limits(max_connections=15, max_keepalive_connections=7)
 
-        async with httpx.AsyncClient(timeout=timeout, limits=limits) as client:
-            yield client
+        async with httpx.AsyncClient(timeout=timeout, limits=limits) as new_client:
+            yield new_client

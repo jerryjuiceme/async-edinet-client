@@ -35,6 +35,7 @@ class EdinetDoclistAPIFetcher(EdinetBaseAPIFetcher):
         date: str | date_type,
         bypass_translation: bool = False,
         doc_types: list[str] | None = None,
+        client: httpx.AsyncClient | None = None,
         # docs_list_type: Literal[1, 2] = 2,
     ) -> DocListSingleMessage:
         """
@@ -44,6 +45,7 @@ class EdinetDoclistAPIFetcher(EdinetBaseAPIFetcher):
             date: Date in YYYY-MM-DD format
             bypass_translation: True to disable and bypass translation
             doc_types: List of document types like ['180', '130','120']
+            client: HTTPX client instance (optional)
 
         :param bypass_translation:
             You can use bypass_translation to disable and bypass translation
@@ -53,6 +55,10 @@ class EdinetDoclistAPIFetcher(EdinetBaseAPIFetcher):
             List of document types like ['180', '130','120']
             you want to filter by. If None or empty, default supported types will be used.
 
+        :param client:
+            HTTPX client instance (optional) if you want to use your own client
+            for instance if you integrate it into a larger application
+
         Returns:
             DocListSingleMessage
             Pydantic model with metadata and filtered document results
@@ -61,10 +67,10 @@ class EdinetDoclistAPIFetcher(EdinetBaseAPIFetcher):
         logger.info("Fetching documents for date: %s", date_str)
         date_obj = datetime.strptime(date_str, "%Y-%m-%d")
         docs_list_type: Literal[1, 2] = 2
-        async with self._get_client() as client:
+        async with self._get_client(client) as http_client:
             try:
                 raw_data, status = await self._fetch_list(
-                    date_str, client, docs_list_type
+                    date_str, http_client, docs_list_type
                 )
                 logger.debug("Status: %s", status)
 
@@ -112,6 +118,7 @@ class EdinetDoclistAPIFetcher(EdinetBaseAPIFetcher):
         date_to: str,
         bypass_translation: bool = False,
         doc_types: list[str] | None = None,
+        client: httpx.AsyncClient | None = None,
         # docs_list_type: Literal[1, 2] = 2,
     ) -> DocListMultiMessage:
         """
@@ -122,6 +129,7 @@ class EdinetDoclistAPIFetcher(EdinetBaseAPIFetcher):
             date_to: End date in YYYY-MM-DD format
             bypass_translation: True to disable and bypass translation
             doc_types: List of document types like ['180', '130','120']
+            client: HTTPX client instance (optional)
 
         :param translator:
             You can use GoogleTranslator or BypassTranslator
@@ -131,6 +139,11 @@ class EdinetDoclistAPIFetcher(EdinetBaseAPIFetcher):
         :param doc_types:
             List of document types like ['180', '130','120']
             you want to filter by. If None, default supported types will be used.
+
+        :param client:
+            HTTPX client instance (optional) if you want to use your own client
+            for instance if you integrate it into a larger application
+
         Returns:
             DocListMultiMessage
             Pydantic model with metadata and filtered document results
@@ -143,12 +156,12 @@ class EdinetDoclistAPIFetcher(EdinetBaseAPIFetcher):
         date_end = datetime.strptime(self._validate_date(date_to), "%Y-%m-%d")
         res = dict(status_code=[], fetch_status=[], message=[], results=[])
 
-        async with self._get_client() as client:
+        async with self._get_client(client) as http_client:
             while date_cursor <= date_end:
                 date_str = date_cursor.strftime("%Y-%m-%d")
                 try:
                     raw_data, status = await self._fetch_list(
-                        date_str, client, docs_list_type
+                        date_str, http_client, docs_list_type
                     )
                     res["status_code"].append({date_str: int(status)})
                     res["fetch_status"].append(

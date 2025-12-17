@@ -28,6 +28,7 @@ class EdinetDocAPIFetcher(EdinetBaseAPIFetcher):
         bypass_translation: bool = False,
         custom_fields: list[str] | None = None,
         raise_on_error: bool = False,
+        client: httpx.AsyncClient | None = None,
     ) -> ExtractDocMessage:
         """Fetches and processes a document from the EDINET API.
 
@@ -37,6 +38,7 @@ class EdinetDocAPIFetcher(EdinetBaseAPIFetcher):
             bypass_translation: True to disable and bypass translation
             custom_fields: List of custom "elementId" fields to extract
             raise_on_error: Whether to raise an exception on error
+            client: HTTPX client instance (optional)
 
         :param bypass_translation:
             You can use bypass_translation to disable and bypass translation
@@ -49,6 +51,11 @@ class EdinetDocAPIFetcher(EdinetBaseAPIFetcher):
 
         :param raise_on_error:
             If True, will raise an exception on error.
+            
+        :param client:
+            HTTPX client instance (optional) if you want to use your own client
+            for instance if you integrate it into a larger application
+            
         Example:
             doc = await fetcher.get_document("S100TM9A")
         Returns:
@@ -62,10 +69,10 @@ class EdinetDocAPIFetcher(EdinetBaseAPIFetcher):
             extract_message=None,
             results=[],
         )
-        async with self._get_client() as client:
+        async with self._get_client(client) as http_client:
             try:
                 # download document
-                content = await self._fetch_doc(doc_id, client, doc_type)
+                content = await self._fetch_doc(doc_id, http_client, doc_type)
 
                 if type(content) is not bytes:
                     msg = "Document %s parsing failed." % (doc_id)
